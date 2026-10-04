@@ -95,6 +95,17 @@ multimodal-serving-engine/
 
 ---
 
+## ⚡ Concurrency & Benchmark Specifications (Phase 4)
+
+The microservice includes an asynchronous concurrency load testing harness (`benchmarks/load_test.py`) simulating multi-worker burst traffic:
+
+- **Concurrency Workers:** 50 simultaneous asynchronous workers
+- **Total Ingestion Load:** 500 requests over synthetic dense vector endpoints
+- **Dynamic Batch Coalescence:** Evaluated across rolling $p50$, $p95$, and $p99$ response latency percentiles
+- **Container Footprint:** Minimal non-root multi-stage distroless/slim runtime (`Dockerfile`) with container healthcheck probing
+
+---
+
 ## 🛠️ Installation & Local Execution
 
 ### 1. Clone the Repository
