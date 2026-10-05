@@ -1,4 +1,4 @@
-'''# High-Throughput Multimodal Serving & Drift Engine 🚀
+# High-Throughput Multimodal Serving & Drift Engine 🚀
 
 A production-grade, asynchronous multimodal inference microservice built with **FastAPI**, **Pydantic V2**, thread-safe **\$O(1)\$ LRU caching**, dynamic micro-batching, live KS-test feature drift monitoring, a two-tier **Semantic Out-of-Distribution (OOD) Gatekeeper**, and a **Quantized ONNX Runtime** backend.
 
@@ -146,4 +146,3 @@ python benchmarks/load_test.py
 docker build -t multimodal-serving-engine:v1 .
 docker run -d -p 8000:8000 --name serving-engine multimodal-serving-engine:v1
 \`\`\`
-''')
