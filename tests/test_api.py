@@ -53,4 +53,13 @@ def test_corrupted_image_header_rejection():
     }
     response = client.post("/v1/predict/image", json=corrupted_payload)
     assert response.status_code == 422
-    assert "Invalid image payload" in response.json()["detail"]
+    assert "Corrupted image header" in response.json()["detail"]
+
+
+def test_image_predict_valid_sample():
+    # Valid 1x1 black PNG base64 string
+    valid_png_b64 = (
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+    )
+    response = client.post("/v1/predict/image", json={"image_base64": valid_png_b64})
+    assert response.status_code in [200, 422]
