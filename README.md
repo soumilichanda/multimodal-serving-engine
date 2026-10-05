@@ -1,12 +1,12 @@
-# High-Throughput Multimodal Serving & Drift Engine 🚀
+'''# High-Throughput Multimodal Serving & Drift Engine 🚀
 
-A production-grade, asynchronous multimodal inference microservice built with **FastAPI**, **Pydantic V2**, thread-safe **$O(1)$ LRU caching**, dynamic micro-batching, live KS-test feature drift monitoring, a two-tier **Semantic Out-of-Distribution (OOD) Gatekeeper**, and a **Quantized ONNX Runtime** backend.
+A production-grade, asynchronous multimodal inference microservice built with **FastAPI**, **Pydantic V2**, thread-safe **\$O(1)\$ LRU caching**, dynamic micro-batching, live KS-test feature drift monitoring, a two-tier **Semantic Out-of-Distribution (OOD) Gatekeeper**, and a **Quantized ONNX Runtime** backend.
 
 ---
 
 ## 🏗️ System Architecture
 
-```text
+\`\`\`text
 Client Request (REST / Async JSON)
         │
         ├──► /v1/predict/vector  (Dense Feature Ingestion)
@@ -55,9 +55,13 @@ Client Request (REST / Async JSON)
                                  │   • Two-Sample KS-Test Feature    │
                                  │     Drift Detection (p < 0.05)    │
                                  └───────────────────────────────────┘
+\`\`\`
 
-📁 Repository Structure
+---
 
+## 📁 Repository Structure
+
+\`\`\`text
 multimodal-serving-engine/
 │
 ├── app/
@@ -89,9 +93,57 @@ multimodal-serving-engine/
 ├── pytest.ini                # Pytest root path & asyncio execution flags
 ├── requirements.txt          # Production and testing runtime dependencies
 └── README.md                 # System architecture documentation & operational guide
+\`\`\`
 
-⚡ Key Engineering FeaturesTwo-Tier Inference & OOD Defense (app/services/):Tier-1 Gatekeeper (gatekeeper.py): Pre-validates base64 magic byte headers (JPEG /9j/ and PNG iVBORw0KGgo) to prevent decoder vulnerabilities, followed by ImageNet domestic pet synset boundary enforcement ([151, 268] ∪ [281, 285]). Out-of-domain inputs are rejected with an explicit HTTP 422 diagnostic.Tier-2 Quantized Backend (onnx_backend.py): Executes quantized ONNX models using optimized graph level flags and 2-thread intra-op CPU execution, with deterministic fallback for CI/CD test harnesses.Thread-Safe $O(1)$ LRU Cache (app/core/cache.py): Intercepts repeated feature vectors using OrderedDict guarded by threading.Lock across concurrent asynchronous event loops.Dynamic Micro-Batching (app/core/batcher.py): Coalesces point queries into dense 2D matrices for SIMD vectorized execution, triggering flushes on capacity ($B_{\max} = 16$) or elapsed timeout ($\Delta t_{\max} = 8\text{ ms}$).Statistical Drift & Telemetry (app/core/telemetry.py): Tracks rolling latency percentiles ($p50, p90, p95, p99$) and applies two-sample Kolmogorov-Smirnov hypothesis tests (scipy.stats.ks_2samp) to flag production data drift ($p < 0.05$).Automated Unit Testing (tests/): 12 comprehensive unit tests covering API contracts, micro-batching queues, drift engine divergence, and OOD header validation.📊 API SpecificationMethodEndpointDescriptionRequest SchemaResponse StatusGET/Service health status and navigation indexNone200 OKGET/healthHealth probe & active LRU cache metricsNone200 OKGET/v1/telemetryRolling latency percentiles & KS drift reportNone200 OKPOST/v1/predict/vectorDynamic micro-batching inference & $O(1)$ cacheVectorInferenceRequest200 OK / 422POST/v1/predict/imageOOD gatekeeper filtering & ONNX runtime inferenceImageInferenceRequest200 OK / 422🛠️ How to Run & Verify1. Run Automated Test SuitePowerShellpython -m pytest tests/ -v
-2. Launch Local ServerPowerShelluvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
-Interactive OpenAPI documentation is available at http://127.0.0.1:8000/docs.3. Run High-Concurrency BenchmarkWith the server running, execute the load generator in a separate terminal:PowerShellpython benchmarks/load_test.py
-4. Containerized Execution (Docker)PowerShelldocker build -t multimodal-serving-engine:v1 .
+---
+
+## ⚡ Key Engineering Features
+
+- **Two-Tier Inference & OOD Defense (\`app/services/\`):**
+  - **Tier-1 Gatekeeper (\`gatekeeper.py\`):** Pre-validates base64 magic byte headers (JPEG \`/9j/\` and PNG \`iVBORw0KGgo\`) to prevent decoder vulnerabilities, followed by ImageNet domestic pet synset boundary enforcement (\`[151, 268] ∪ [281, 285]\`). Out-of-domain inputs are rejected with an explicit HTTP 422 diagnostic.
+  - **Tier-2 Quantized Backend (\`onnx_backend.py\`):** Executes quantized ONNX models using optimized graph level flags and 2-thread intra-op CPU execution, with deterministic fallback for CI/CD test harnesses.
+- **Thread-Safe \$O(1)\$ LRU Cache (\`app/core/cache.py\`):** Intercepts repeated feature vectors using \`OrderedDict\` guarded by \`threading.Lock\` across concurrent asynchronous event loops.
+- **Dynamic Micro-Batching (\`app/core/batcher.py\`):** Coalesces point queries into dense 2D matrices for SIMD vectorized execution, triggering flushes on capacity (\$B_{\\max} = 16\$) or elapsed timeout (\$\\Delta t_{\\max} = 8\\text{ ms}\$).
+- **Statistical Drift & Telemetry (\`app/core/telemetry.py\`):** Tracks rolling latency percentiles (\$p50, p90, p95, p99\$) and applies two-sample Kolmogorov-Smirnov hypothesis tests (\`scipy.stats.ks_2samp\`) to flag production data drift (\$p < 0.05\$).
+- **Automated Unit Testing (\`tests/\`):** 12 comprehensive unit tests covering API contracts, micro-batching queues, drift engine divergence, and OOD header validation.
+
+---
+
+## 📊 API Specification
+
+| Method | Endpoint | Description | Request Schema | Response Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **GET** | \`/\` | Service health status and navigation index | None | \`200 OK\` |
+| **GET** | \`/health\` | Health probe & active LRU cache metrics | None | \`200 OK\` |
+| **GET** | \`/v1/telemetry\` | Rolling latency percentiles & KS drift report | None | \`200 OK\` |
+| **POST** | \`/v1/predict/vector\` | Dynamic micro-batching inference & \$O(1)\$ cache | \`VectorInferenceRequest\` | \`200 OK\` / \`422\` |
+| **POST** | \`/v1/predict/image\` | OOD gatekeeper filtering & ONNX runtime inference | \`ImageInferenceRequest\` | \`200 OK\` / \`422\` |
+
+---
+
+## 🛠️ How to Run & Verify
+
+### 1. Run Automated Test Suite
+\`\`\`powershell
+python -m pytest tests/ -v
+\`\`\`
+
+### 2. Launch Local Server
+\`\`\`powershell
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+\`\`\`
+
+Interactive OpenAPI documentation is available at \`http://127.0.0.1:8000/docs\`.
+
+### 3. Run High-Concurrency Benchmark
+With the server running, execute the load generator in a separate terminal:
+\`\`\`powershell
+python benchmarks/load_test.py
+\`\`\`
+
+### 4. Containerized Execution (Docker)
+\`\`\`powershell
+docker build -t multimodal-serving-engine:v1 .
 docker run -d -p 8000:8000 --name serving-engine multimodal-serving-engine:v1
+\`\`\`
+''')
