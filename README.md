@@ -1,12 +1,13 @@
+@'
 # High-Throughput Multimodal Serving & Drift Engine 🚀
 
-A production-grade, asynchronous multimodal inference microservice built with **FastAPI**, **Pydantic V2**, thread-safe **\$O(1)\$ LRU caching**, dynamic micro-batching, live KS-test feature drift monitoring, a two-tier **Semantic Out-of-Distribution (OOD) Gatekeeper**, and a **Quantized ONNX Runtime** backend.
+A production-grade, asynchronous multimodal inference microservice built with **FastAPI**, **Pydantic V2**, thread-safe **$O(1)$ LRU caching**, dynamic micro-batching, live KS-test feature drift monitoring, a two-tier **Semantic Out-of-Distribution (OOD) Gatekeeper**, and a **Quantized ONNX Runtime** backend.
 
 ---
 
 ## 🏗️ System Architecture
 
-\`\`\`text
+```text
 Client Request (REST / Async JSON)
         │
         ├──► /v1/predict/vector  (Dense Feature Ingestion)
@@ -55,13 +56,11 @@ Client Request (REST / Async JSON)
                                  │   • Two-Sample KS-Test Feature    │
                                  │     Drift Detection (p < 0.05)    │
                                  └───────────────────────────────────┘
-\`\`\`
 
 ---
 
 ## 📁 Repository Structure
 
-\`\`\`text
 multimodal-serving-engine/
 │
 ├── app/
@@ -93,7 +92,6 @@ multimodal-serving-engine/
 ├── pytest.ini                # Pytest root path & asyncio execution flags
 ├── requirements.txt          # Production and testing runtime dependencies
 └── README.md                 # System architecture documentation & operational guide
-\`\`\`
 
 ---
 
@@ -124,25 +122,24 @@ multimodal-serving-engine/
 ## 🛠️ How to Run & Verify
 
 ### 1. Run Automated Test Suite
-\`\`\`powershell
+
 python -m pytest tests/ -v
-\`\`\`
+
 
 ### 2. Launch Local Server
-\`\`\`powershell
+
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
-\`\`\`
+
 
 Interactive OpenAPI documentation is available at \`http://127.0.0.1:8000/docs\`.
 
 ### 3. Run High-Concurrency Benchmark
 With the server running, execute the load generator in a separate terminal:
-\`\`\`powershell
+
 python benchmarks/load_test.py
-\`\`\`
+
 
 ### 4. Containerized Execution (Docker)
-\`\`\`powershell
+
 docker build -t multimodal-serving-engine:v1 .
 docker run -d -p 8000:8000 --name serving-engine multimodal-serving-engine:v1
-\`\`\`
