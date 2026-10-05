@@ -3,7 +3,8 @@ app/main.py
 Asynchronous FastAPI Gateway with Dynamic Batching,
 O(1) LRU Caching, Live Latency Profiling, and Drift Telemetry.
 """
-
+from app.services.gatekeeper import SemanticOODGatekeeper
+from app.services.onnx_backend import ONNXInferenceBackend
 from contextlib import asynccontextmanager
 import time
 from typing import List
@@ -21,6 +22,8 @@ from app.core.batcher import DynamicBatcher
 # --- 1. Global State & Observability Engines ---
 vector_cache = ThreadSafeLRUCache(capacity=256)
 profiler = LatencyProfiler(window_size=1000)
+gatekeeper = SemanticOODGatekeeper(confidence_threshold=0.08)
+onnx_backend = ONNXInferenceBackend(model_path=None)
 
 # Statistical baseline (d=3)
 np.random.seed(42)
@@ -154,12 +157,27 @@ async def predict_vector(payload: VectorInferenceRequest):
 )
 async def predict_image(payload: ImageInferenceRequest):
     start_time = time.perf_counter()
-    raw_str = payload.image_base64
 
-    if not (raw_str.startswith("/9j/") or raw_str.startswith("iVBORw0KGgo")):
+    # 1. Byte Sanitization
+    try:
+        raw_bytes = gatekeeper.validate_magic_bytes(payload.image_base64)
+    except ValueError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="Invalid image payload: Missing valid JPEG (JFIF) or PNG header signature.",
+            detail=str(e),
+        )
+
+    # 2. Preprocess to Tensor
+    tensor = gatekeeper.preprocess_image(raw_bytes)
+
+    # 3. Model Inference via ONNX Backend
+    top_class_id, top_prob = onnx_backend.predict(tensor)
+
+    # 4. Tier-1 Semantic OOD Filter
+    if not gatekeeper.is_in_distribution(top_class_id, top_prob):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"OOD_INPUT_REJECTED: Class ID {top_class_id} is outside the domestic pet distribution.",
         )
 
     latency_ms = (time.perf_counter() - start_time) * 1000.0
@@ -167,8 +185,8 @@ async def predict_image(payload: ImageInferenceRequest):
 
     return InferenceResponse(
         modality="image_base64",
-        prediction="ACCEPTED_IMAGE_STREAM",
-        confidence=0.992,
+        prediction=f"CLASS_{top_class_id}",
+        confidence=round(top_prob, 4),
         cached=False,
         latency_ms=round(latency_ms, 3),
     )
