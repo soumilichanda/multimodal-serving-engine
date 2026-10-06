@@ -1,5 +1,8 @@
 @'
 # High-Throughput Multimodal Serving & Drift Engine 🚀
+[![CI Test & Build Verification](https://github.com/soumilichanda/multimodal-serving-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/soumilichanda/multimodal-serving-engine/actions/workflows/ci.yml)
+![Python Versions](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue)
+![Architecture](https://img.shields.io/badge/Architecture-Asynchronous%20FastAPI%20%2B%20ONNX-success)
 
 A production-grade, asynchronous multimodal inference microservice built with **FastAPI**, **Pydantic V2**, thread-safe **$O(1)$ LRU caching**, dynamic micro-batching, live KS-test feature drift monitoring, a two-tier **Semantic Out-of-Distribution (OOD) Gatekeeper**, and a **Quantized ONNX Runtime** backend.
 
