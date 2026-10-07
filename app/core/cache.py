@@ -5,7 +5,7 @@ Thread-safe O(1) Least Recently Used (LRU) Inference Cache.
 
 from collections import OrderedDict
 from threading import Lock
-from typing import Any, Tuple
+from typing import Any
 
 
 class ThreadSafeLRUCache:
@@ -16,12 +16,12 @@ class ThreadSafeLRUCache:
 
     def __init__(self, capacity: int = 256):
         self.capacity = capacity
-        self.cache: OrderedDict[Tuple[Any, ...], Any] = OrderedDict()
+        self.cache: OrderedDict[tuple[Any, ...], Any] = OrderedDict()
         self.lock = Lock()
         self.hits = 0
         self.misses = 0
 
-    def get(self, key: Tuple[Any, ...]) -> Any | None:
+    def get(self, key: tuple[Any, ...]) -> Any | None:
         with self.lock:
             if key not in self.cache:
                 self.misses += 1
@@ -30,7 +30,7 @@ class ThreadSafeLRUCache:
             self.cache.move_to_end(key)
             return self.cache[key]
 
-    def put(self, key: Tuple[Any, ...], value: Any) -> None:
+    def put(self, key: tuple[Any, ...], value: Any) -> None:
         with self.lock:
             if key in self.cache:
                 self.cache.move_to_end(key)

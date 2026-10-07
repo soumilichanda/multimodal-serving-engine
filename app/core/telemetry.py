@@ -4,10 +4,11 @@ Statistical Feature Drift Engine (Two-Sample KS-Test) and
 Thread-Safe Latency Profiler for Real-Time Inference Observability.
 """
 
+import time
 from collections import deque
 from threading import Lock
-import time
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 import numpy as np
 from scipy.stats import ks_2samp
 
@@ -31,7 +32,7 @@ class LatencyProfiler:
             self.latencies.append(latency_ms)
             self.total_requests += 1
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Calculates windowed percentiles and lifetime system throughput."""
         with self.lock:
             if not self.latencies:
@@ -89,11 +90,11 @@ class StatisticalDriftEngine:
         self.lock = Lock()
 
         # Allocate rolling buffers per feature dimension
-        self.live_buffers: List[deque[float]] = [
+        self.live_buffers: list[deque[float]] = [
             deque(maxlen=window_size) for _ in range(self.num_features)
         ]
 
-    def record_observation(self, feature_vector: List[float]) -> None:
+    def record_observation(self, feature_vector: list[float]) -> None:
         """Appends an incoming production vector into the rolling inspection window."""
         with self.lock:
             if len(feature_vector) != self.num_features:
@@ -103,7 +104,7 @@ class StatisticalDriftEngine:
             for idx, val in enumerate(feature_vector):
                 self.live_buffers[idx].append(val)
 
-    def detect_drift(self) -> Dict[str, Any]:
+    def detect_drift(self) -> dict[str, Any]:
         """
         Runs two-sample KS-tests across all feature dimensions:
         H0: The live production feature comes from the same distribution as baseline.

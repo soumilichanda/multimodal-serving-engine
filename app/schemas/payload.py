@@ -3,7 +3,6 @@ app/schemas/payload.py
 Strict Pydantic V2 contracts for multimodal inference payloads.
 """
 
-from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -12,7 +11,7 @@ class VectorInferenceRequest(BaseModel):
     Validation schema for tabular/numerical feature payloads.
     Guarantees non-empty float sequences within reasonable dimension boundaries.
     """
-    features: List[float] = Field(
+    features: list[float] = Field(
         ...,
         description="Dense numerical feature vector for real-time inference.",
         json_schema_extra={"example": [0.54, -1.22, 0.88, 2.15]}
@@ -20,7 +19,7 @@ class VectorInferenceRequest(BaseModel):
 
     @field_validator("features")
     @classmethod
-    def validate_features(cls, v: List[float]) -> List[float]:
+    def validate_features(cls, v: list[float]) -> list[float]:
         if not v:
             raise ValueError("Feature vector cannot be empty.")
         if len(v) > 2048:

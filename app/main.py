@@ -3,21 +3,22 @@ app/main.py
 Asynchronous FastAPI Gateway with Dynamic Batching,
 O(1) LRU Caching, Live Latency Profiling, and Drift Telemetry.
 """
-from app.services.gatekeeper import SemanticOODGatekeeper
-from app.services.onnx_backend import ONNXInferenceBackend
-from contextlib import asynccontextmanager
 import time
-from typing import List
+from contextlib import asynccontextmanager
+
 import numpy as np
 from fastapi import FastAPI, HTTPException, status
-from app.schemas.payload import (
-    VectorInferenceRequest,
-    ImageInferenceRequest,
-    InferenceResponse,
-)
+
+from app.core.batcher import DynamicBatcher
 from app.core.cache import ThreadSafeLRUCache
 from app.core.telemetry import LatencyProfiler, StatisticalDriftEngine
-from app.core.batcher import DynamicBatcher
+from app.schemas.payload import (
+    ImageInferenceRequest,
+    InferenceResponse,
+    VectorInferenceRequest,
+)
+from app.services.gatekeeper import SemanticOODGatekeeper
+from app.services.onnx_backend import ONNXInferenceBackend
 
 # --- 1. Global State & Observability Engines ---
 vector_cache = ThreadSafeLRUCache(capacity=256)
@@ -35,7 +36,7 @@ drift_engine = StatisticalDriftEngine(
 )
 
 
-def batch_forward_inference(batch_matrix: np.ndarray) -> List[dict]:
+def batch_forward_inference(batch_matrix: np.ndarray) -> list[dict]:
     """
     Vectorized forward pass over dense batch matrices (B, d).
     Replaces point scalar loops with optimized NumPy SIMD operations.

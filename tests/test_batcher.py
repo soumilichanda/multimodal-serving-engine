@@ -4,8 +4,10 @@ Asyncio unit tests verifying dynamic batching invariants and concurrent executio
 """
 
 import asyncio
+
 import numpy as np
 import pytest
+
 from app.core.batcher import DynamicBatcher
 
 

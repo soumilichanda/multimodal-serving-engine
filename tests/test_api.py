@@ -5,6 +5,7 @@ and thread-safe LRU caching behavior.
 """
 
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 client = TestClient(app)
