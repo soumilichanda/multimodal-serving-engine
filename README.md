@@ -1,4 +1,4 @@
-﻿# High-Throughput Multimodal Serving & Drift Engine ðŸš€
+# High-Throughput Multimodal Serving & Drift Engine 🚀
 [![CI Test & Build Verification](https://github.com/soumilichanda/multimodal-serving-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/soumilichanda/multimodal-serving-engine/actions/workflows/ci.yml)
 ![Python Versions](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-blue)
 ![Architecture](https://img.shields.io/badge/Architecture-Asynchronous%20FastAPI%20%2B%20ONNX-success)
@@ -7,99 +7,99 @@ A production-grade, asynchronous multimodal inference microservice built with **
 
 ---
 
-## ðŸ—ï¸ System Architecture
+## 🏗️ System Architecture
 
-```text
+`	ext
 Client Request (REST / Async JSON)
-  â”‚
-  â”œâ”€â”€ /v1/predict/vector  (Dense Feature Ingestion)
-  â””â”€â”€ /v1/predict/image   (Base64 Image Streams)
-  â”‚
-  â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚             FastAPI Gateway & Ingestion Layer          â”‚
-â”‚ â€¢ Pydantic V2 Strict Contract Enforcement              â”‚
-â”‚ â€¢ Dimension Bounds & Magic Byte Header Validation      â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                           â”‚
-                           â–¼
-â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-â”‚                Thread-Safe LRU Cache Layer             â”‚
-â”‚ â€¢ O(1) Cache Hit Intercept (OrderedDict + Mutex Lock)  â”‚
-â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-               â”‚ (Cache Hit)               â”‚ (Cache Miss)
-               â–¼                           â–¼
-       [ Return Cached Payload ]  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                                  â”‚   Dynamic Micro-Batcher Worker    â”‚
-                                  â”‚ â€¢ Capacity Flush: B_max = 16      â”‚
-                                  â”‚ â€¢ Timeout Flush: delta_t_max = 8msâ”‚
-                                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                                    â”‚
-                                                    â–¼
-                                  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                                  â”‚   Tier-1: Semantic OOD Gatekeeper â”‚
-                                  â”‚ â€¢ Magic Byte Pre-Validation       â”‚
-                                  â”‚ â€¢ Synset Boundary: [151, 268] U   â”‚
-                                  â”‚                    [281, 285]     â”‚
-                                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                                    â”‚ (In-Distribution)
-                                                    â–¼
-                                  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                                  â”‚   Tier-2: Quantized ONNX Runtime  â”‚
-                                  â”‚ â€¢ Graph Optimization (ORT_ALL)    â”‚
-                                  â”‚ â€¢ SIMD NCHW Tensor Execution      â”‚
-                                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
-                                                    â”‚
-                                                    â–¼
-                                  â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
-                                  â”‚    Live Telemetry & KS-Drift      â”‚
-                                  â”‚ â€¢ Windowed p50/p95/p99 Latency    â”‚
-                                  â”‚ â€¢ Two-Sample KS-Test Feature      â”‚
-                                  â”‚   Drift Detection (p < 0.05)      â”‚
-                                  â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+  │
+  ├── /v1/predict/vector  (Dense Feature Ingestion)
+  └── /v1/predict/image   (Base64 Image Streams)
+  │
+  ▼
+┌────────────────────────────────────────────────────────┐
+│             FastAPI Gateway & Ingestion Layer          │
+│ • Pydantic V2 Strict Contract Enforcement              │
+│ • Dimension Bounds & Magic Byte Header Validation      │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+                           ▼
+┌────────────────────────────────────────────────────────┐
+│                Thread-Safe LRU Cache Layer             │
+│ • O(1) Cache Hit Intercept (OrderedDict + Mutex Lock)  │
+└──────────────┬───────────────────────────┬─────────────┘
+               │ (Cache Hit)               │ (Cache Miss)
+               ▼                           ▼
+       [ Return Cached Payload ]  ┌───────────────────────────────────┐
+                                  │   Dynamic Micro-Batcher Worker    │
+                                  │ • Capacity Flush: B_max = 16      │
+                                  │ • Timeout Flush: delta_t_max = 8ms│
+                                  └─────────────────┬─────────────────┘
+                                                    │
+                                                    ▼
+                                  ┌───────────────────────────────────┐
+                                  │   Tier-1: Semantic OOD Gatekeeper │
+                                  │ • Magic Byte Pre-Validation       │
+                                  │ • Synset Boundary: [151, 268] U   │
+                                  │                    [281, 285]     │
+                                  └─────────────────┬─────────────────┘
+                                                    │ (In-Distribution)
+                                                    ▼
+                                  ┌───────────────────────────────────┐
+                                  │   Tier-2: Quantized ONNX Runtime  │
+                                  │ • Graph Optimization (ORT_ALL)    │
+                                  │ • SIMD NCHW Tensor Execution      │
+                                  └─────────────────┬─────────────────┘
+                                                    │
+                                                    ▼
+                                  ┌───────────────────────────────────┐
+                                  │    Live Telemetry & KS-Drift      │
+                                  │ • Windowed p50/p95/p99 Latency    │
+                                  │ • Two-Sample KS-Test Feature      │
+                                  │   Drift Detection (p < 0.05)      │
+                                  └───────────────────────────────────┘
 `
 
 ---
 
-## ðŸ“ Repository Structure
+## 📁 Repository Structure
 
-```text
+`	ext
 multimodal-serving-engine/
-â”‚
-â”œâ”€â”€ app/
-â”‚   â”œâ”€â”€ __init__.py
-â”‚   â”œâ”€â”€ main.py              # FastAPI gateway, lifespan orchestration & routing
-â”‚   â”œâ”€â”€ core/
-â”‚   â”‚   â”œâ”€â”€ __init__.py
-â”‚   â”‚   â”œâ”€â”€ cache.py         # Thread-safe O(1) LRU Inference Cache
-â”‚   â”‚   â”œâ”€â”€ telemetry.py     # Latency profiler & Two-Sample KS-test drift engine
-â”‚   â”‚   â””â”€â”€ batcher.py       # Asynchronous dynamic request micro-batcher
-â”‚   â”œâ”€â”€ schemas/
-â”‚   â”‚   â”œâ”€â”€ __init__.py
-â”‚   â”‚   â””â”€â”€ payload.py       # Pydantic V2 strict data contracts & field validators
-â”‚   â””â”€â”€ services/
-â”‚       â”œâ”€â”€ __init__.py
-â”‚       â”œâ”€â”€ gatekeeper.py    # Tier-1 Semantic OOD Filter & NCHW Preprocessor
-â”‚       â””â”€â”€ onnx_backend.py  # Tier-2 Quantized ONNX Runtime Inference Engine
-â”‚
-â”œâ”€â”€ benchmarks/
-â”‚   â””â”€â”€ load_test.py         # Asynchronous 50-worker concurrency load harness
-â”‚
-â”œâ”€â”€ tests/
-â”‚   â”œâ”€â”€ __init__.py
-â”‚   â”œâ”€â”€ test_api.py          # Endpoint integration, OOD rejection & caching tests
-â”‚   â”œâ”€â”€ test_telemetry.py    # Latency profiler & Kolmogorov-Smirnov drift tests
-â”‚   â””â”€â”€ test_batcher.py      # Micro-batcher capacity and timeout flush tests
-â”‚
-â”œâ”€â”€ Dockerfile               # Multi-stage non-root hardened container definition
-â”œâ”€â”€ pytest.ini               # Pytest root path & asyncio execution flags
-â”œâ”€â”€ requirements.txt         # Production and testing runtime dependencies
-â””â”€â”€ README.md                # System architecture documentation & operational guide
+│
+├── app/
+│   ├── __init__.py
+│   ├── main.py              # FastAPI gateway, lifespan orchestration & routing
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── cache.py         # Thread-safe O(1) LRU Inference Cache
+│   │   ├── telemetry.py     # Latency profiler & Two-Sample KS-test drift engine
+│   │   └── batcher.py       # Asynchronous dynamic request micro-batcher
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   └── payload.py       # Pydantic V2 strict data contracts & field validators
+│   └── services/
+│       ├── __init__.py
+│       ├── gatekeeper.py    # Tier-1 Semantic OOD Filter & NCHW Preprocessor
+│       └── onnx_backend.py  # Tier-2 Quantized ONNX Runtime Inference Engine
+│
+├── benchmarks/
+│   └── load_test.py         # Asynchronous 50-worker concurrency load harness
+│
+├── tests/
+│   ├── __init__.py
+│   ├── test_api.py          # Endpoint integration, OOD rejection & caching tests
+│   ├── test_telemetry.py    # Latency profiler & Kolmogorov-Smirnov drift tests
+│   └── test_batcher.py      # Micro-batcher capacity and timeout flush tests
+│
+├── Dockerfile               # Multi-stage non-root hardened container definition
+├── pytest.ini               # Pytest root path & asyncio execution flags
+├── requirements.txt         # Production and testing runtime dependencies
+└── README.md                # System architecture documentation & operational guide
 `
 
 ---
 
-## âš¡ Key Engineering Features
+## ⚡ Key Engineering Features
 
 - **Two-Tier Inference & OOD Defense (pp/services/):**
   - **Tier-1 Gatekeeper (gatekeeper.py):** Pre-validates base64 magic byte headers (JPEG /9j/ and PNG iVBORw0KGgo) and filters out-of-distribution classes before inference.
@@ -111,7 +111,7 @@ multimodal-serving-engine/
 
 ---
 
-## ðŸš¦ API Specification
+## 🚦 API Specification
 
 | Method | Endpoint | Description | Request Schema | Response Status |
 | :---: | :--- | :--- | :--- | :---: |
@@ -123,7 +123,7 @@ multimodal-serving-engine/
 
 ---
 
-## ðŸ› ï¸ How to Run & Verify
+## 🛠️ How to Run & Verify
 
 ### 1. Run Automated Test Suite
 `powershell
@@ -149,7 +149,7 @@ docker run -d -p 8000:8000 --name serving-engine multimodal-serving-engine:v1
 
 ---
 
-## âš¡ Concurrency & Latency Benchmark Results
+## ⚡ Concurrency & Latency Benchmark Results
 
 High-concurrency synthetic load simulation executed via enchmarks/load_test.py across 50 asynchronous client workers:
 
@@ -164,4 +164,3 @@ High-concurrency synthetic load simulation executed via enchmarks/load_test.py 
 | **Extreme Tail Latency ($)** | Worst-Case Tail Bound | 2,761.03 ms |
 
 > Dynamic micro-batching coalesces point requests into vectorized SIMD evaluations under load, minimizing thread lock contention and preventing GPU/CPU starvation.
-
