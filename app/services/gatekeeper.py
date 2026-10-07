@@ -1,13 +1,15 @@
-"""
+﻿"""
 app/services/gatekeeper.py
 Tier-1 Semantic Gatekeeper: Raw byte sanitization and ImageNet Synset OOD Filter.
 """
 
 import base64
+import binascii
 import io
-from typing import Tuple
-from PIL import Image
+from typing import ClassVar
+
 import numpy as np
+from PIL import Image
 
 
 class SemanticOODGatekeeper:
@@ -18,23 +20,23 @@ class SemanticOODGatekeeper:
        synsets in [151, 268] (canines) U [281, 285] (felines).
     """
 
-    PET_SYNSET_RANGES = [
+    PET_SYNSET_RANGES: ClassVar[tuple[tuple[int, int], ...]] = (
         (151, 268),  # Domestic dogs
         (281, 285),  # Domestic cats
-    ]
+    )
 
     def __init__(self, confidence_threshold: float = 0.08):
         self.confidence_threshold = confidence_threshold
 
     def validate_magic_bytes(self, b64_str: str) -> bytes:
         """Enforces valid JPEG/PNG headers before decoding."""
-        if not (b64_str.startswith("/9j/") or b64_str.startswith("iVBORw0KGgo")):
+        if not b64_str.startswith(("/9j/", "iVBORw0KGgo")):
             raise ValueError("Corrupted image header: Missing valid JFIF/PNG signature.")
 
         try:
             raw_bytes = base64.b64decode(b64_str)
-        except Exception as e:
-            raise ValueError(f"Base64 decoding failed: {str(e)}")
+        except (ValueError, binascii.Error) as exc:
+            raise ValueError(f"Base64 decoding failed: {exc}") from exc
 
         return raw_bytes
 
@@ -52,7 +54,7 @@ class SemanticOODGatekeeper:
         return False
 
     def preprocess_image(
-        self, raw_bytes: bytes, target_size: Tuple[int, int] = (224, 224)
+        self, raw_bytes: bytes, target_size: tuple[int, int] = (224, 224)
     ) -> np.ndarray:
         """Converts raw bytes to an NCHW normalized float32 tensor."""
         image = Image.open(io.BytesIO(raw_bytes)).convert("RGB")

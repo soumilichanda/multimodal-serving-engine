@@ -1,20 +1,21 @@
-"""
+﻿"""
 app/core/batcher.py
 Asynchronous Dynamic Request Batcher with Time-Window and Size Thresholds.
 """
 
 import asyncio
 import time
-from typing import Any, Callable, List, Tuple
+from collections.abc import Callable
+
 import numpy as np
 
 
 class BatchItem:
     """Encapsulates an incoming payload vector and its completion future."""
 
-    __slots__ = ("features", "future", "arrival_time")
+    __slots__ = ("arrival_time", "features", "future")
 
-    def __init__(self, features: List[float]):
+    def __init__(self, features: list[float]):
         self.features = features
         self.future: asyncio.Future = asyncio.get_event_loop().create_future()
         self.arrival_time: float = time.perf_counter()
@@ -29,7 +30,7 @@ class DynamicBatcher:
 
     def __init__(
         self,
-        forward_fn: Callable[[np.ndarray], List[dict]],
+        forward_fn: Callable[[np.ndarray], list[dict]],
         max_batch_size: int = 32,
         max_delay_ms: float = 10.0,
     ):
@@ -57,7 +58,7 @@ class DynamicBatcher:
             except asyncio.CancelledError:
                 pass
 
-    async def enqueue(self, features: List[float]) -> dict:
+    async def enqueue(self, features: list[float]) -> dict:
         """
         Pushes a single request payload onto the queue and awaits completion.
         Automatically starts the background worker if not already running.
@@ -78,7 +79,7 @@ class DynamicBatcher:
             except asyncio.CancelledError:
                 break
 
-            batch: List[BatchItem] = [first_item]
+            batch: list[BatchItem] = [first_item]
             start_window = time.perf_counter()
 
             # 2. Accumulate items until max_batch_size is reached or timeout expires
@@ -106,7 +107,7 @@ class DynamicBatcher:
                 for item, res in zip(batch, results):
                     if not item.future.done():
                         item.future.set_result(res)
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001
                 for item in batch:
                     if not item.future.done():
                         item.future.set_exception(exc)
