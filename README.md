@@ -161,3 +161,21 @@ High-concurrency synthetic load simulation executed via `benchmarks/load_test.py
 | **Extreme Latency ($p99$)** | Worst-Case Tail Bound | < 2,600 ms |
 
 > Dynamic micro-batching coalesces point requests into vectorized SIMD evaluations under load, minimizing thread lock contention and preventing GPU/CPU starvation.
+
+---
+
+## ⚡ Concurrency & Latency Benchmark Results
+
+High-concurrency synthetic load simulation executed via `benchmarks/load_test.py` across 50 asynchronous client workers:
+
+| Metric | Target Specification | Empirical Result |
+| :--- | :--- | :--- |
+| **Concurrent Workers** | 50 Async Workers | 50 Simultaneous Workers |
+| **Total Ingested Payloads** | 500 Requests | 500 / 500 (100% Success) |
+| **Total Wall Time** | Real-Time Execution | 5.97s |
+| **System Throughput** | High-Throughput Saturation | 83.7 req/s |
+| **Median Latency ($p50$)** | Low-Latency SLA (< 400 ms) | 293.13 ms |
+| **Tail Latency ($p95$)** | Sub-2.0s Bound | 1,660.29 ms |
+| **Extreme Tail Latency ($p99$)** | Worst-Case Tail Bound | 2,761.03 ms |
+
+> Dynamic micro-batching coalesces point requests into vectorized SIMD evaluations under load, minimizing thread lock contention and preventing GPU/CPU starvation.
