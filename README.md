@@ -57,13 +57,13 @@ Client Request (REST / Async JSON)
                                   │ • Two-Sample KS-Test Feature      │
                                   │   Drift Detection (p < 0.05)      │
                                   └───────────────────────────────────┘
-`
 
----
 
+
+```
 ## 📁 Repository Structure
 
-```Text
+```
 multimodal-serving-engine/
 │
 ├── app/
@@ -95,23 +95,23 @@ multimodal-serving-engine/
 ├── pytest.ini               # Pytest root path & asyncio execution flags
 ├── requirements.txt         # Production and testing runtime dependencies
 └── README.md                # System architecture documentation & operational guide
-`
 
----
 
-## ⚡ Key Engineering Features
+
+```
+### ⚡ Key Engineering Features
 
 - **Two-Tier Inference & OOD Defense (pp/services/):**
   - **Tier-1 Gatekeeper (gatekeeper.py):** Pre-validates base64 magic byte headers (JPEG /9j/ and PNG iVBORw0KGgo) and filters out-of-distribution classes before inference.
   - **Tier-2 Quantized Backend (onnx_backend.py):** Executes quantized ONNX models using optimized graph execution (CPUExecutionProvider) with deterministic evaluation fallbacks.
-- **Thread-Safe (1)$ LRU Cache (pp/core/cache.py):** Intercepts repeated feature vectors using SHA-256 state hashing and an eviction mutex lock.
-- **Dynamic Micro-Batching (pp/core/batcher.py):** Coalesces point queries into dense 2D matrices using capacity ({max} = 16$) and temporal ($\Delta t_{max} = 8	ext{ ms}$) flushes.
-- **Statistical Drift & Telemetry (pp/core/telemetry.py):** Tracks rolling latency percentiles ($, $, $, $) and Kolmogorov-Smirnov two-sample drift detection ( < 0.05$).
+- **Thread-Safe (1)$ LRU Cache (app/core/cache.py):** Intercepts repeated feature vectors using SHA-256 state hashing and an eviction mutex lock.
+- **Dynamic Micro-Batching (app/core/batcher.py):** Coalesces point queries into dense 2D matrices using capacity ({max} = 16$) and temporal ($\Delta t_{max} = 8	ext{ ms}$) flushes.
+- **Statistical Drift & Telemetry (app/core/telemetry.py):** Tracks rolling latency percentiles ($, $, $, $) and Kolmogorov-Smirnov two-sample drift detection ( < 0.05$).
 - **Automated Unit Testing (	ests/):** 12 comprehensive unit and integration tests covering API contracts, micro-batching, and OOD defenses.
 
 ---
 
-## 🚦 API Specification
+### 🚦 API Specification
 
 | Method | Endpoint | Description | Request Schema | Response Status |
 | :---: | :--- | :--- | :--- | :---: |
@@ -123,35 +123,35 @@ multimodal-serving-engine/
 
 ---
 
-## 🛠️ How to Run & Verify
+### 🛠️ How to Run & Verify
 
 ### 1. Run Automated Test Suite
-`powershell
+```powershell
 python -m pytest tests/ -v
-`
+```
 
 ### 2. Launch Local Server
-`powershell
+```powershell
 uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
-`
+```
 Interactive OpenAPI documentation is available at http://127.0.0.1:8000/docs.
 
 ### 3. Run High-Concurrency Benchmark
-`powershell
+```powershell
 python benchmarks/load_test.py
-`
+```
 
 ### 4. Containerized Execution (Docker)
-`powershell
+````powershell
 docker build -t multimodal-serving-engine:v1 .
 docker run -d -p 8000:8000 --name serving-engine multimodal-serving-engine:v1
-`
+````
 
 ---
 
 ## ⚡ Concurrency & Latency Benchmark Results
 
-High-concurrency synthetic load simulation executed via enchmarks/load_test.py across 50 asynchronous client workers:
+High-concurrency synthetic load simulation executed via benchmarks/load_test.py across 50 asynchronous client workers:
 
 | Metric | Target Specification | Empirical Result |
 | :--- | :--- | :--- |
