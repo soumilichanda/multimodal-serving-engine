@@ -9,7 +9,7 @@ A production-grade, asynchronous multimodal inference microservice built with **
 
 ## 🏗️ System Architecture
 
-`	ext
+```Text
 Client Request (REST / Async JSON)
   │
   ├── /v1/predict/vector  (Dense Feature Ingestion)
@@ -63,7 +63,7 @@ Client Request (REST / Async JSON)
 
 ## 📁 Repository Structure
 
-`	ext
+```Text
 multimodal-serving-engine/
 │
 ├── app/
