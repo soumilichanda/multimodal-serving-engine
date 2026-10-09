@@ -58,8 +58,10 @@ Client Request (REST / Async JSON)
                                   │   Drift Detection (p < 0.05)      │
                                   └───────────────────────────────────┘
 
-### 🖥️ Interactive OpenAPI Documentation
+``` 
+## 🖥️ Interactive OpenAPI Documentation
 ![Swagger UI Interface](docs/assets/swagger_ui.png)
+```
 
 ```
 ## 📁 Repository Structure
